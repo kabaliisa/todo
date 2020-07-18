@@ -1,2 +1,3 @@
-# **todo**
-A simple todo app API
+# **Todo**
+A simple todo app  ResfulAPI
+
