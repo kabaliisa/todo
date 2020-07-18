@@ -5,11 +5,18 @@ import models from "../models";
 const router = express.Router();
 
 router.get("/api/v1/todos", function (req, res) {
-  res.status(200).send({
-    success: "true",
-    message: "todos retrieved successfully",
-    todo: db,
+  models.Todo.findAll().then((todos) => {
+    res.status(200).send({
+      success: "true",
+      message: "todos retrieved successfully",
+      todo: todos,
+    });
   });
+  // res.status(200).send({
+  //   success: "true",
+  //   message: "todos retrieved successfully",
+  //   todo: db,
+  // });
 });
 
 router.post("/api/v1/todos", (req, res) => {
@@ -19,6 +26,18 @@ router.post("/api/v1/todos", (req, res) => {
       message: "title is required",
     });
   }
+
+  models.Todo.findOne({
+    where: { title: req.body.title },
+  }).then((todoFound) => {
+    if (todoFound) {
+      return res.status(403).send({
+        success: "true",
+        message: "A todo ith that title already exists",
+      });
+    }
+  });
+
   const todo = {
     title: req.body.title,
   };
@@ -33,18 +52,20 @@ router.post("/api/v1/todos", (req, res) => {
 
 router.get("/api/v1/todos/:id", (req, res) => {
   const id = parseInt(req.params.id, 10);
-  db.map((todo) => {
-    if (todo.id == id) {
+
+  models.Todo.findByPk(id).then((todo) => {
+    if (todo) {
       return res.status(200).send({
         success: "true",
-        message: "todo retrived successfully",
+        message: "todo retrieved successfully",
         todo,
       });
+    } else {
+      return res.status(400).send({
+        success: "false",
+        message: "todo does not exist",
+      });
     }
-  });
-  return res.status(400).send({
-    success: "false",
-    message: "todo does not exist",
   });
 });
 
